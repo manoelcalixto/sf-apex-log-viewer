@@ -1,3 +1,7 @@
+## [0.2.3](https://github.com/Electivus/sf-apex-log-viewer/compare/0.2.2...0.2.3) (2026-03-16)
+
+
+
 ## [0.2.2](https://github.com/Electivus/sf-apex-log-viewer/compare/0.2.1...0.2.2) (2026-03-16)
 
 
