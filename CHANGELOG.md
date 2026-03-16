@@ -1,3 +1,12 @@
+## [0.2.5](https://github.com/Electivus/sf-apex-log-viewer/compare/0.2.4...0.2.5) (2026-03-16)
+
+
+### Bug Fixes
+
+* make bin/run.js executable in git ([05abbe0](https://github.com/Electivus/sf-apex-log-viewer/commit/05abbe020e97a1a7cad40258cceb98a8965f150a))
+
+
+
 ## [0.2.4](https://github.com/Electivus/sf-apex-log-viewer/compare/0.2.3...0.2.4) (2026-03-16)
 
 
