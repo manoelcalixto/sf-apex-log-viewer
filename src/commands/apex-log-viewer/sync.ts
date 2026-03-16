@@ -6,7 +6,7 @@ import { SyncExecutionError, syncLogs } from '../../sync.js';
 import type { SyncResult } from '../../types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('sf-apex-log-viewer', 'apex-log-viewer.sync');
+const messages = Messages.loadMessages('@electivus/sf-apex-log-viewer', 'apex-log-viewer.sync');
 
 export default class Sync extends SfCommand<SyncResult> {
   public static readonly summary = messages.getMessage('summary');

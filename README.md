@@ -1,6 +1,6 @@
-# sf-apex-log-viewer
+# @electivus/sf-apex-log-viewer
 
-`sf-apex-log-viewer` is a Salesforce CLI plugin focused on one job: keeping a local `apexlogs` directory in sync with new Apex logs so AI agents and local tools can inspect them quickly.
+`@electivus/sf-apex-log-viewer` is a Salesforce CLI plugin focused on one job: keeping a local `apexlogs` directory in sync with new Apex logs so AI agents and local tools can inspect them quickly.
 
 The first version is intentionally sync-first. It does not try to replace `rg`, your editor, or downstream analysis tools. It downloads raw logs to disk, keeps a per-org checkpoint, and returns structured JSON for automation.
 
@@ -24,7 +24,7 @@ sf plugins link .
 For a packaged install later:
 
 ```bash
-sf plugins install sf-apex-log-viewer@x.y.z
+sf plugins install @electivus/sf-apex-log-viewer@x.y.z
 ```
 
 ## Usage

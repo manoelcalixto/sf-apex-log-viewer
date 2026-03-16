@@ -1,5 +1,5 @@
 {
-  "name": "sf-apex-log-viewer",
+  "name": "@electivus/sf-apex-log-viewer",
   "description": "Sync Salesforce Apex logs into a local apexlogs directory for AI agent workflows.",
   "version": "0.2.2",
   "dependencies": {
@@ -22,10 +22,10 @@
     "node": ">=18.0.0"
   },
   "files": [
-    "/lib",
-    "/messages",
-    "/oclif.manifest.json",
-    "/oclif.lock"
+    "lib",
+    "messages",
+    "oclif.manifest.json",
+    "oclif.lock"
   ],
   "keywords": [
     "salesforce",
@@ -60,7 +60,7 @@
     "link-check": "wireit",
     "lint": "wireit",
     "postpack": "sf-clean --ignore-signing-artifacts",
-    "prepack": "sf-prepack",
+    "prepack": "node ./scripts/prepare-publish.mjs && sf-prepack",
     "test": "wireit",
     "test:nuts": "nyc mocha \"**/*.nut.ts\" --slow 4500 --timeout 600000 --parallel",
     "test:only": "wireit",
