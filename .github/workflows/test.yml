@@ -1,21 +1,151 @@
 name: tests
+
 on:
-  push:
-    branches-ignore: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  unit-tests:
-    uses: salesforcecli/github-workflows/.github/workflows/unitTest.yml@main
-  nuts:
-    needs: unit-tests
-    uses: salesforcecli/github-workflows/.github/workflows/nut.yml@main
-    secrets: inherit
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-      fail-fast: false
-    with:
-      os: ${{ matrix.os }}
+  pr-unit-ubuntu:
+    name: pr-unit / ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: yarn
+
+      - uses: google/wireit@setup-github-actions-caching/v2
+        continue-on-error: true
+
+      - name: Cache node modules
+        id: cache-nodemodules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
+        if: ${{ steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+
+      - name: Install wireit
+        run: yarn add wireit@^0.14.12
+
+      - run: yarn build
+
+      - name: yarn test
+        uses: salesforcecli/github-workflows/.github/actions/retry@main
+        with:
+          command: yarn test
+        env:
+          SF_DISABLE_TELEMETRY: true
+
+  pr-unit-windows:
+    name: pr-unit / windows-latest
+    runs-on: windows-latest
+    steps:
+      - run: git config --system core.longpaths true
+
+      - uses: actions/checkout@v4
+
+      - uses: google/wireit@setup-github-actions-caching/v2
+        continue-on-error: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: yarn
+
+      - name: Cache node modules
+        id: cache-nodemodules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
+        if: ${{ steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+
+      - name: Install wireit
+        run: yarn add wireit@^0.14.12
+
+      - run: yarn build
+
+      - name: yarn test
+        uses: salesforcecli/github-workflows/.github/actions/retry@main
+        with:
+          command: yarn test
+        env:
+          SF_DISABLE_TELEMETRY: true
+
+  pr-nut-ubuntu:
+    name: pr-nut / ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google/wireit@setup-github-actions-caching/v2
+        continue-on-error: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: yarn
+
+      - name: Cache node modules
+        id: cache-nodemodules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+
+      - uses: salesforcecli/github-workflows/.github/actions/yarnInstallWithRetries@main
+        if: ${{ steps.cache-nodemodules.outputs.cache-hit != 'true' }}
+
+      - name: add CLI as global dependency
+        uses: salesforcecli/github-workflows/.github/actions/retry@main
+        with:
+          max_attempts: 3
+          command: npm install @salesforce/cli@nightly -g
+
+      - name: Install wireit
+        run: yarn add wireit@^0.14.12
+
+      - run: yarn compile
+
+      - run: yarn oclif manifest
+
+      - name: NUTs with 3 attempts
+        uses: salesforcecli/github-workflows/.github/actions/retry@main
+        with:
+          max_attempts: 3
+          command: yarn test:nuts
+          retry_on: error
+        env:
+          TESTKIT_AUTH_URL: ${{ secrets.TESTKIT_AUTH_URL }}
+          TESTKIT_HUB_USERNAME: ${{ secrets.TESTKIT_HUB_USERNAME }}
+          TESTKIT_JWT_CLIENT_ID: ${{ secrets.TESTKIT_JWT_CLIENT_ID }}
+          TESTKIT_JWT_KEY: ${{ secrets.TESTKIT_JWT_KEY }}
+          TESTKIT_HUB_INSTANCE: ${{ secrets.TESTKIT_HUB_INSTANCE }}
+          ONEGP_TESTKIT_AUTH_URL: ${{ secrets.ONEGP_TESTKIT_AUTH_URL }}
+          SF_CHANGE_CASE_SFDX_AUTH_URL: ${{ secrets.SF_CHANGE_CASE_SFDX_AUTH_URL }}
+          SF_CHANGE_CASE_TEMPLATE_ID: ${{ secrets.SF_CHANGE_CASE_TEMPLATE_ID }}
+          SF_CHANGE_CASE_CONFIGURATION_ITEM: ${{ secrets.SF_CHANGE_CASE_CONFIGURATION_ITEM }}
+          TESTKIT_SETUP_RETRIES: 2
+          SF_DISABLE_TELEMETRY: true
+          DEBUG: ${{ vars.DEBUG }}
