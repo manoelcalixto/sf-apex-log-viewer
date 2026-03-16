@@ -94,3 +94,19 @@ Run tests:
 ```bash
 npm test
 ```
+
+## Secure publishing
+
+This repository is configured for npm Trusted Publishing through GitHub Actions instead of a long-lived write token.
+
+Before publishing from GitHub Actions, configure npm Trusted Publishing with:
+
+- Repository owner: `Electivus`
+- Repository name: `sf-apex-log-viewer`
+- Workflow filename: `onRelease.yml`
+
+After Trusted Publishing is working, prefer this npm package setting:
+
+- `Require two-factor authentication and disallow tokens`
+
+That setup keeps interactive 2FA for humans while letting GitHub Actions publish through short-lived OIDC credentials.

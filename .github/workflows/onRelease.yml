@@ -1,33 +1,88 @@
 name: publish
+
 on:
   release:
-    # both release and prereleases
     types: [published]
-  # support manual release in case something goes wrong and needs to be repeated or tested
   workflow_dispatch:
     inputs:
       tag:
         description: github tag that needs to publish
         type: string
         required: true
+
+permissions:
+  contents: read
+
+# Configure npm Trusted Publishing against this workflow filename: `onRelease.yml`.
+concurrency:
+  group: publish-${{ github.event.release.tag_name || inputs.tag || github.run_id }}
+  cancel-in-progress: false
+
 jobs:
   getDistTag:
     outputs:
       tag: ${{ steps.distTag.outputs.tag }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name || inputs.tag  }}
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
       - uses: salesforcecli/github-workflows/.github/actions/getPreReleaseTag@main
         id: distTag
-  npm:
-    uses: salesforcecli/github-workflows/.github/workflows/npmPublish.yml@main
+
+  check-publish:
     needs: [getDistTag]
-    with:
-      tag: ${{ needs.getDistTag.outputs.tag || 'latest' }}
-      githubTag: ${{ github.event.release.tag_name || inputs.tag }}
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.is-published.outputs.published }}
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Is published
+        id: is-published
+        shell: bash
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          RESPONSE=$(npm view "${PACKAGE_NAME}@${RELEASE_TAG}" version --json --silent || echo "Not published")
+
+          if [[ "$RESPONSE" == "\"$RELEASE_TAG\"" ]]; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+      - run: echo "[INFO] Is package published:\ $STEPS_IS_PUBLISHED_PUBLISHED"
+        env:
+          STEPS_IS_PUBLISHED_PUBLISHED: ${{ steps.is-published.outputs.published }}
+
+  npm-publish:
+    needs: [getDistTag, check-publish]
+    if: needs.check-publish.outputs.published != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DIST_TAG: ${{ needs.getDistTag.outputs.tag || 'latest' }}
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: yarn
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install dependencies with yarn
+        run: yarn install --frozen-lockfile
+      - name: Build package
+        run: yarn build
+      - name: Publish to npm with trusted publishing
+        run: npm publish --access public --tag "$DIST_TAG"
