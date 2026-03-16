@@ -1,3 +1,12 @@
+## [0.2.4](https://github.com/Electivus/sf-apex-log-viewer/compare/0.2.3...0.2.4) (2026-03-16)
+
+
+### Bug Fixes
+
+* add npm provenance repository metadata ([ac9a7a9](https://github.com/Electivus/sf-apex-log-viewer/commit/ac9a7a93e09a5d318b078ca03f9c628639c829d8))
+
+
+
 ## [0.2.3](https://github.com/Electivus/sf-apex-log-viewer/compare/0.2.2...0.2.3) (2026-03-16)
 
 
