@@ -1,6 +1,11 @@
 name: create-github-release
 
 on:
+  push:
+    branches:
+      - prerelease/**
+    tags-ignore:
+      - "*"
   workflow_dispatch:
     inputs:
       prerelease:
@@ -14,4 +19,4 @@ jobs:
       SVC_CLI_BOT_GITHUB_TOKEN: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
     with:
       prerelease: ${{ inputs.prerelease }}
-      skip-on-empty: false
+      skip-on-empty: ${{ github.event_name == 'push' }}
