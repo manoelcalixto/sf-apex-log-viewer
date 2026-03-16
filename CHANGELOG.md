@@ -1,4 +1,13 @@
-# 0.2.0 (2026-03-16)
+## [0.2.1](https://github.com/manoelcalixto/sf-apex-log-viewer/compare/0.2.0...0.2.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* pass publish secrets explicitly ([b8828ef](https://github.com/manoelcalixto/sf-apex-log-viewer/commit/b8828ef33222f1f7bcfe3195fa690a020da342be))
+
+
+
+# [0.2.0](https://github.com/manoelcalixto/sf-apex-log-viewer/compare/6dbe523d22b7e9d58d051e420623b8a040172350...0.2.0) (2026-03-16)
 
 
 ### Bug Fixes
