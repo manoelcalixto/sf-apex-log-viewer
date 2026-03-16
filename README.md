@@ -79,8 +79,8 @@ Downloaded logs are saved as:
 Install dependencies and build:
 
 ```bash
-npm install --ignore-scripts
-npm run build
+yarn install --ignore-scripts
+yarn build
 ```
 
 Run the command locally:
@@ -92,7 +92,7 @@ node ./bin/dev.js apex-log-viewer sync --help
 Run tests:
 
 ```bash
-npm test
+yarn test
 ```
 
 ## Secure publishing
