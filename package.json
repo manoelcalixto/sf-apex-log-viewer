@@ -35,6 +35,10 @@
     "logs",
     "ai-agents"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Electivus/sf-apex-log-viewer"
+  },
   "license": "MIT",
   "oclif": {
     "commands": "./lib/commands",
